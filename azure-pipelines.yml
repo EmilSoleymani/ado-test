@@ -1,0 +1,56 @@
+# Gradle
+# Build your Java project and run tests with Gradle using a Gradle wrapper script.
+# Add steps that analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/java
+
+trigger:
+- pull_request
+
+pr:
+- '*'
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+- task: Gradle@2
+  inputs:
+    workingDirectory: ''
+    gradleWrapperFile: 'gradlew'
+    gradleOptions: '-Xmx3072m'
+    javaHomeOption: 'JDKVersion'
+    jdkVersionOption: '1.8'
+    jdkArchitectureOption: 'x64'
+    publishJUnitResults: true
+    testResultsFiles: '**/TEST-*.xml'
+    tasks: 'build'
+  continueOnError: true
+  displayName: 'Run Tests and Build'
+
+- script: |
+    GITHUB_TOKEN=$(GITHUB_PAT)
+    REPO_OWNER=$(Build.Repository.Name)  # Assuming repo name matches repository name in GitHub
+    REPO_NAME=$(Build.Repository.Name)   # Assuming repo name matches repository name in GitHub
+    SHA=$(Build.SourceVersion)            # Get the current commit SHA from the pipeline environment
+
+    # Determine the test result status
+    if [ $? -eq 0 ]; then
+        STATE="success"
+        DESCRIPTION="Gradle Tests Passed"
+    else
+        STATE="failure"
+        DESCRIPTION="Gradle Tests Failed"
+    fi
+
+    # Create a status check using GitHub API
+    curl -X POST \
+      -H "Authorization: token $GITHUB_TOKEN" \
+      -H "Accept: application/vnd.github.v3+json" \
+      https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/statuses/$SHA \
+      -d '{
+        "state": "'$STATE'",
+        "target_url": "https://www.google.com/",  # Placeholder
+        "description": "'$DESCRIPTION'",
+        "context": "continuous-integration/azure-devops"
+      }'
+  displayName: 'Publish GitHub Status Check'
