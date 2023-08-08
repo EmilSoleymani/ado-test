@@ -28,7 +28,7 @@ steps:
   displayName: 'Run Tests and Build'
 
 - script: |
-    GITHUB_TOKEN=$(GITHUB_PAT)
+    GITHUB_TOKEN=$(ENV_GITHUB_PAT)
     REPO_OWNER=$(Build.Repository.Name)  # Assuming repo name matches repository name in GitHub
     REPO_NAME=$(Build.Repository.Name)   # Assuming repo name matches repository name in GitHub
     SHA=$(Build.SourceVersion)            # Get the current commit SHA from the pipeline environment
@@ -49,7 +49,7 @@ steps:
       https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/statuses/$SHA \
       -d '{
         "state": "'$STATE'",
-        "target_url": "https://www.google.com/",  # Placeholder
+        "target_url": "https://www.google.com/",
         "description": "'$DESCRIPTION'",
         "context": "continuous-integration/azure-devops"
       }'
