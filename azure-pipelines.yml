@@ -9,7 +9,7 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
-- script: ./gradlew test
+- script: ./gradlew build test
   continueOnError: true
   displayName: 'Run Tests and Build'
 
