@@ -1,4 +1,3 @@
-
 trigger:
 - pull_request
 
@@ -9,9 +8,14 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
-- script: ./gradlew build test
-  continueOnError: true
-  displayName: 'Run Tests and Build'
+- task: Gradle@3
+  inputs:
+    gradleWrapperFile: 'gradlew'
+    tasks: 'build test'
+    publishJUnitResults: false
+    javaHomeOption: 'JDKVersion'
+    sonarQubeRunAnalysis: false
+    spotBugsAnalysis: false
 
 - script: |
     GITHUB_TOKEN=$(ENV_GITHUB_PAT)
